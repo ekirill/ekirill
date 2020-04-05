@@ -130,6 +130,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "ekirill", "static"),
+]
+# static will be collected here by `collectstatic`
+STATIC_ROOT = os.path.join(BASE_DIR, "assets")
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',

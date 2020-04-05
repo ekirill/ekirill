@@ -1,0 +1,18 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>"{{ camera.caption }}"/"{{ event.start_time|time:"H:i" }}"</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+
+<body>
+    <video controls autoplay>
+      <source src="{% url "cameras:camera-event-download" camera_uid=camera.uid event_uid=event.uid %}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+</body>
+</html>

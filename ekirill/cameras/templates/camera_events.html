@@ -1,9 +1,12 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="ru">
 
 <head>
     <meta charset="UTF-8">
-    <title>События камеры</title>
+    <title>События камеры "{{ camera.caption }}"</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
 
 <body>
@@ -12,9 +15,15 @@
             <div class="day-events-header">{{ day_events.day }}</div>
             <div class="day-events-list">
                 <ul>
+                {% spaceless %}
                     {% for ev in day_events.events %}
-                        <li><a href="{{ ev.url }}">{{ ev.start_time|time:"H:i" }}</a> {{ ev.duration }}s</li>
+                        <li>
+                            <a href="{% url "cameras:camera-event" camera_uid=camera.uid event_uid=ev.uid %}">
+                                {{ ev.start_time|time:"H:i" }}
+                            </a>&nbsp;{{ ev.duration }}s
+                        </li>
                     {% endfor %}
+                {% endspaceless %}
                 </ul>
             </div>
         </div>

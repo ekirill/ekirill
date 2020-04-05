@@ -1,15 +1,18 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="ru">
 
 <head>
     <meta charset="UTF-8">
     <title>Список камер</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
 
 <body>
     <ul class="cameras-list">
     {% for cam in cameras %}
-        <li><a href="{% url "cameras:camera-events" uid=cam.uid %}">{{ cam.caption }}</a></li>
+        <li><a href="{% url "cameras:camera-events-list" uid=cam.uid %}">{{ cam.caption }}</a></li>
     {% endfor %}
     </ul>
 </body>

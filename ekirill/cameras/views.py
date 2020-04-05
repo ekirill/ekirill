@@ -2,10 +2,14 @@ import datetime
 from typing import List, NamedTuple
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.views import View
 from django.views.generic import TemplateView
 
-from ekirill.cameras.services.cameras import get_cameras_list, get_camera_events, CameraEvent
+from ekirill.cameras.services.cameras import (
+    get_cameras_list, get_camera_events, get_event_internal_url,
+    CameraEvent, Camera,
+    get_camera_event, get_camera)
 
 
 class CamerasListView(LoginRequiredMixin, TemplateView):
@@ -22,7 +26,7 @@ class DayEvents(NamedTuple):
     events: List[CameraEvent]
 
 
-class CameraEventsView(LoginRequiredMixin, TemplateView):
+class CameraEventsListView(LoginRequiredMixin, TemplateView):
     template_name = 'camera_events.html'
 
     def _group_events(self, events: List[CameraEvent]) -> List[DayEvents]:
@@ -63,5 +67,31 @@ class CameraEventsView(LoginRequiredMixin, TemplateView):
         grouped_events = self._group_events(events)
 
         return {
+            'camera': get_camera(camera_uid),
             'events': grouped_events,
+        }
+
+
+class CameraEventDownloadView(LoginRequiredMixin, View):
+    def get(self, request, **kwargs):
+        camera_uid = kwargs.get('camera_uid')
+        event_uid = kwargs.get('event_uid')
+
+        response = HttpResponse()
+        response["Content-Disposition"] = "attachment; filename={}_{}".format(camera_uid, event_uid)
+        response["X-Accel-Redirect"] = "/internal-camera/{}".format(get_event_internal_url(camera_uid, event_uid))
+
+        return response
+
+
+class CameraEventView(LoginRequiredMixin, TemplateView):
+    template_name = 'camera_event.html'
+
+    def get_context_data(self, **kwargs):
+        camera_uid = kwargs.get('camera_uid')
+        event_uid = kwargs.get('event_uid')
+
+        return {
+            'camera': get_camera(camera_uid),
+            'event': get_camera_event(camera_uid, event_uid),
         }
