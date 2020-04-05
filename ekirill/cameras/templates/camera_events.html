@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>События камеры</title>
+</head>
+
+<body>
+    {% for day_events in events %}
+        <div class="day-events">
+            <div class="day-events-header">{{ day_events.day }}</div>
+            <div class="day-events-list">
+                <ul>
+                    {% for ev in day_events.events %}
+                        <li><a href="{{ ev.url }}">{{ ev.start_time|time:"H:i" }}</a> {{ ev.duration }}s</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endfor %}
+</body>
+</html>

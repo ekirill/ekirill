@@ -1,72 +1,67 @@
 import datetime
-import os
+from typing import List, NamedTuple
 
-import pytz
-from rest_framework import serializers
-from rest_framework.generics import ListAPIView
-from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
+from django.views.generic import TemplateView
 
-
-class CamerasList(ListAPIView):
-    class CameraSerializer(serializers.Serializer):
-        id = serializers.CharField(source='pk')
-        caption = serializers.CharField(required=True)
-
-    serializer_class = CameraSerializer
-
-    def get_queryset(self):
-        for dirpath, dirnames, files in os.walk(settings.CAMERAS_VIDEO_DIR):
-            return [
-                {
-                    'pk': _dir,
-                    'caption': _dir,
-                }
-                for _dir in sorted(dirnames)
-            ]
+from ekirill.cameras.services.cameras import get_cameras_list, get_camera_events, CameraEvent
 
 
-class CameraEventsList(ListAPIView):
-    class CameraEventSerializer(serializers.Serializer):
-        id = serializers.CharField(source='pk')
-        start_timestamp = serializers.IntegerField()
-        end_timestamp = serializers.IntegerField()
-        url = serializers.CharField()
+class CamerasListView(LoginRequiredMixin, TemplateView):
+    template_name = 'cameras_list.html'
 
-    serializer_class = CameraEventSerializer
+    def get_context_data(self, **kwargs):
+        return {
+            'cameras': get_cameras_list(),
+        }
 
-    def get_queryset(self):
-        camera_id = self.kwargs.get(self.lookup_field)
-        camera_videos_path = os.path.join(settings.CAMERAS_VIDEO_DIR, camera_id)
-        if not os.path.exists(camera_videos_path):
-            return []
 
-        events = []
-        for dirpath, dirnames, files in os.walk(camera_videos_path):
-            for filename in files:
-                if not filename.endswith('.mp4'):
-                    continue
+class DayEvents(NamedTuple):
+    day: datetime.date
+    events: List[CameraEvent]
 
-                file_size = os.path.getsize(os.path.join(dirpath, filename))
-                duration = min(120, max(3, int(file_size / 1024 / 700)))
-                dt_parts = filename.split('_')
-                if len(dt_parts) < 4:
-                    continue
 
-                year, month, day, tm, *_ = dt_parts
-                tz = pytz.timezone('Europe/Moscow')
-                try:
-                    start_dt = datetime.datetime(
-                        int(year), int(month), int(day), int(tm[:2]), int((tm[2:4])), tzinfo=tz
-                    )
-                except (ValueError, TypeError):
-                    continue
+class CameraEventsView(LoginRequiredMixin, TemplateView):
+    template_name = 'camera_events.html'
 
-                start_timestamp = start_dt.timestamp()
-                events.append({
-                    'pk': filename,
-                    'start_timestamp': start_timestamp,
-                    'end_timestamp': start_timestamp + duration,
-                    'url': '',
-                })
+    def _group_events(self, events: List[CameraEvent]) -> List[DayEvents]:
+        grouped_events = []
 
-        return list(sorted(events, key=lambda e: e['start_timestamp'], reverse=True))
+        current_day = events[0].start_time.date()
+        day_events = []
+        for ev in events:
+            day = ev.start_time.date()
+            if day != current_day:
+                if day_events:
+                    grouped_events.append(DayEvents(
+                        day=current_day,
+                        events=day_events,
+                    ))
+                current_day = day
+                day_events = [ev]
+            else:
+                day_events.append(ev)
+
+        if day_events:
+            grouped_events.append(DayEvents(
+                day=current_day,
+                events=day_events,
+            ))
+
+        return grouped_events
+
+    def get_context_data(self, **kwargs):
+        camera_uid = kwargs.get('uid')
+        if not camera_uid:
+            raise Http404()
+
+        events = get_camera_events(camera_uid)
+        if events is None:
+            raise Http404()
+
+        grouped_events = self._group_events(events)
+
+        return {
+            'events': grouped_events,
+        }
