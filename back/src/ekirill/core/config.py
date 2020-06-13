@@ -1,3 +1,4 @@
+import pytz
 from environs import Env
 
 default_env = Env()
@@ -26,6 +27,13 @@ class Camera:
             self.videodir = env('VIDEODIR')
 
 
+class Webdav:
+    def __init__(self, env):
+        with env.prefixed('WEBDAV_'):
+            self.login = env('LOGIN', '')
+            self.password = env('PASSWORD', '')
+
+
 class GoogleOAuthSettings:
     def __init__(self, env):
         with env.prefixed('GOOGLE_OAUTH2_'):
@@ -42,7 +50,13 @@ class Auth:
 class AppConfig:
     def __init__(self, env=default_env):
         with env.prefixed('EKIRILL_'):
-            self.secret = env('SECRET', 'devsecret')
+            self.base_url = env('BASE_URL')
+            self.secret = env('SECRET', 'dev_secret')
+            self.port = env('BACKEND_PORT', 8176)
+            self.tz = env('TZ', 'Europe/Moscow')
+            self.tzinfo = pytz.timezone(self.tz)
+
+            self.webdav = Webdav(env)
             self.db = DB(env)
             self.camera = Camera(env)
             self.auth = Auth(env)

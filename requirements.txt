@@ -1,6 +1,4 @@
-Django==3.0.4
-djangorestframework==3.11.0
 environs==7.3.0
-psycopg2-binary==2.8.4
-pytz==2019.3
-social-auth-app-django==3.1.0
+fastapi==0.54.1
+pytz==2020.1
+uvicorn==0.11.5

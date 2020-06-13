@@ -1,0 +1,2 @@
+class CameraDoesNotExist(Exception):
+    pass
