@@ -1,0 +1,30 @@
+version: '3.6'
+
+services:
+  back:
+    container_name: back
+    build:
+      context: .
+      dockerfile: ./back/docker/Dockerfile
+    volumes:
+      - "${EKIRILL_CAMERA_VIDEODIR}:/tmp/camera/:ro"
+    env_file: .env
+    environment:
+      - EKIRILL_CAMERA_VIDEODIR=/tmp/camera/
+      - EKIRILL_DB_DEFAULT_HOST=db
+    ports:
+      - "8176:8176"
+    command: ["uvicorn", "ekirill.app:app", "--host", "0.0.0.0", "--workers", "3", "--limit-concurrency", "10", "--port", "8176"]
+
+  storage_support:
+    container_name: storage_support
+    build:
+      context: .
+      dockerfile: ./storage_support/docker/Dockerfile
+    volumes:
+      - "${EKIRILL_CAMERA_VIDEODIR}:/tmp/camera/"
+    env_file: .env
+    environment:
+      - EKIRILL_CAMERA_VIDEODIR=/tmp/camera/
+      - EKIRILL_DB_DEFAULT_HOST=db
+    command: ['/app/size_watcher.py']
