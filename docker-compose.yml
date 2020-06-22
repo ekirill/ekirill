@@ -30,7 +30,6 @@ services:
       - "8178:80"
     environment:
       - EKIRILL_STORAGE_DIR=/tmp/webdav/
-    restart: always
     networks:
       - ekirill
 
