@@ -3,8 +3,6 @@ import heapq
 import os
 import time
 
-import daemon
-
 from ekirill.config import app_config
 
 
@@ -14,7 +12,7 @@ class SizeWatcher:
         self._files = set()
         self._size = 0
         self._path = path
-        self._max_size_gb = max_size_gb
+        self._max_size_gb = float(max_size_gb)
 
     @property
     def _size_in_gb(self) -> float:
@@ -41,7 +39,8 @@ class SizeWatcher:
                 _, file_name, file_size = heapq.heappop(self._heap)
                 print(f'Removing `{file_name}`')
                 try:
-                    # os.unlink(file_name)
+                    os.unlink(file_name)
+                    self._files.remove(file_name)
                     self._size -= file_size
                 except IOError as e:
                     print(f'Failed, skipping: {e}')
@@ -54,6 +53,6 @@ class SizeWatcher:
 
 
 if __name__ == '__main__':
-    with daemon.DaemonContext():
-        watcher = SizeWatcher(app_config.camera.videodir, app_config.camera.max_size_gb)
-        watcher.run()
+    print('Start watching the storage.')
+    watcher = SizeWatcher(app_config.storage.dir, app_config.storage.max_size_gb)
+    watcher.run()

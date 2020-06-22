@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./back/docker/Dockerfile
     volumes:
-      - "${EKIRILL_CAMERA_VIDEODIR}:/tmp/camera/:ro"
+      - "storage:/tmp/camera/:ro"
     env_file: .env
     environment:
       - EKIRILL_CAMERA_VIDEODIR=/tmp/camera/
@@ -22,9 +22,11 @@ services:
       context: .
       dockerfile: ./storage_support/docker/Dockerfile
     volumes:
-      - "${EKIRILL_CAMERA_VIDEODIR}:/tmp/camera/"
+      - "storage:/tmp/camera/"
     env_file: .env
     environment:
-      - EKIRILL_CAMERA_VIDEODIR=/tmp/camera/
-      - EKIRILL_DB_DEFAULT_HOST=db
-    command: ['/app/size_watcher.py']
+      - EKIRILL_STORAGE_DIR=/tmp/camera/
+    command: ['python', '-u', '/app/size_watcher.py']
+
+volumes:
+  storage:

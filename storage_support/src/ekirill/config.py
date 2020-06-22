@@ -6,11 +6,11 @@ default_env = Env()
 default_env.read_env()
 
 
-class Camera:
+class Storage:
     def __init__(self, env):
-        with env.prefixed('CAMERA_'):
-            self.videodir = env('VIDEODIR')
-            self.max_size_gb = env('VIDEODIR_MAX_SIZE_GB')
+        with env.prefixed('STORAGE_'):
+            self.dir = env('DIR')
+            self.max_size_gb = env('MAX_SIZE_GB')
 
 
 class AppConfig:
@@ -19,7 +19,7 @@ class AppConfig:
             self.tz = env('TZ', 'Europe/Moscow')
             self.tzinfo = pytz.timezone(self.tz)
 
-            self.camera = Camera(env)
+            self.storage = Storage(env)
 
 
 app_config = AppConfig()
