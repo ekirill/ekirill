@@ -18,37 +18,66 @@ class SizeWatcher:
     def _size_in_gb(self) -> float:
         return round(self._size / 1024 / 1024 / 1024, 1)
 
-    def get_new_files(self):
+    def _add_file(self, file_name):
+        if file_name not in self._files:
+            # new file should be added to heap
+            self._files.add(file_name)
+
+            file_size = os.path.getsize(file_name)
+            file_ctime = time.ctime(os.path.getctime(file_name))
+            heapq.heappush(self._heap, (file_ctime, file_name, file_size))
+            self._size += file_size
+
+            print(f'Added {file_name}, total size now is: {self._size_in_gb} Gb')
+
+    def _remove_file(self):
+        """
+        Removes the oldest file
+        """
+        _, file_name, file_size = heapq.heappop(self._heap)
+        print(f'Removing `{file_name}`')
+        try:
+            os.unlink(file_name)
+            self._files.remove(file_name)
+            self._size -= file_size
+        except IOError as e:
+            print(f'Failed, skipping: {e}')
+
+    def _forget_files(self, file_names):
+        new_heap = []
+        for file_ctime, file_name, file_size in self._heap:
+            if file_name in file_names:
+                self._files.remove(file_name)
+                self._size -= file_size
+                print(f'File {file_name} disappeared, total size now is: {self._size_in_gb} Gb')
+            else:
+                new_heap.append((file_ctime, file_name, file_size))
+        heapq.heapify(new_heap)
+        self._heap = new_heap
+
+    def _get_new_files(self):
+        seen = set()
         for root, _, files in os.walk(self._path):
             for file in files:
                 file_name = os.path.join(root, file)
-                if file_name not in self._files:
-                    self._files.add(file_name)
+                seen.add(file_name)
+                self._add_file(file_name)
 
-                    file_size = os.path.getsize(file_name)
-                    file_ctime = time.ctime(os.path.getctime(file_name))
-                    heapq.heappush(self._heap, (file_ctime, file_name, file_size))
-                    self._size += file_size
+        # if some files were removed externally, we should forget them
+        dissapeared = self._files - seen
+        if dissapeared:
+            self._forget_files(dissapeared)
 
-                    print(f'Added {file_name}, total size now is: {self._size_in_gb} Gb')
-
-    def clean(self):
+    def _clean(self):
         if self._size_in_gb > self._max_size_gb:
             print(f'Size exceeds {self._max_size_gb} Gb')
             while self._size_in_gb > self._max_size_gb and len(self._heap):
-                _, file_name, file_size = heapq.heappop(self._heap)
-                print(f'Removing `{file_name}`')
-                try:
-                    os.unlink(file_name)
-                    self._files.remove(file_name)
-                    self._size -= file_size
-                except IOError as e:
-                    print(f'Failed, skipping: {e}')
+                self._remove_file()
 
     def run(self):
         while True:
-            self.get_new_files()
-            self.clean()
+            self._get_new_files()
+            self._clean()
             time.sleep(10)
 
 
