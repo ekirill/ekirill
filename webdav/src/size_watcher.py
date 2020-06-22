@@ -1,18 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import heapq
 import os
 import time
 
+from ekirill.common import file_is_free
 from ekirill.config import app_config
 
 
 class SizeWatcher:
-    def __init__(self, path: str, max_size_gb: int):
-        self._heap = []
-        self._files = set()
-        self._size = 0
+    def __init__(self, path: str, max_size_gb: float, full_recheck_every: int):
+        self._reset()
         self._path = path
-        self._max_size_gb = float(max_size_gb)
+        self._max_size_gb = max_size_gb
+        self._full_recheck_every = full_recheck_every
 
     @property
     def _size_in_gb(self) -> float:
@@ -60,8 +60,10 @@ class SizeWatcher:
         for root, _, files in os.walk(self._path):
             for file in files:
                 file_name = os.path.join(root, file)
-                seen.add(file_name)
-                self._add_file(file_name)
+                if file_is_free(file_name):
+                    # if file is used by another process, it may being written right now, skipping
+                    seen.add(file_name)
+                    self._add_file(file_name)
 
         # if some files were removed externally, we should forget them
         dissapeared = self._files - seen
@@ -74,14 +76,24 @@ class SizeWatcher:
             while self._size_in_gb > self._max_size_gb and len(self._heap):
                 self._remove_file()
 
+    def _reset(self):
+        self._last_recheck = time.time()
+        self._heap = []
+        self._files = set()
+        self._size = 0
+
     def run(self):
         while True:
+            if time.time() - self._last_recheck >= self._full_recheck_every:
+                print('Time to full recheck.')
+                self._reset()
+
             self._get_new_files()
             self._clean()
-            time.sleep(10)
+            time.sleep(60)
 
 
 if __name__ == '__main__':
-    print('Start watching the storage.')
-    watcher = SizeWatcher(app_config.storage.dir, app_config.storage.max_size_gb)
+    print(f'Start watching the storage. `{app_config.storage.dir}`')
+    watcher = SizeWatcher(app_config.storage.dir, app_config.storage.max_size_gb, app_config.storage.full_recheck_every)
     watcher.run()

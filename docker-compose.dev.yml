@@ -2,31 +2,11 @@ version: '3.6'
 
 services:
   back:
-    container_name: back
-    build:
-      context: .
-      dockerfile: ./back/docker/Dockerfile
     volumes:
-      - "storage:/tmp/camera/:ro"
-      - "/home/ekirill/projects/ekirill/back/src/:/app/"
-    env_file: .env
-    environment:
-      - EKIRILL_CAMERA_VIDEODIR=/tmp/camera/
-      - EKIRILL_DB_DEFAULT_HOST=db
-    ports:
-      - "8176:8176"
+      - "storage:/tmp/webdav/:ro"
+      - "./back/src/:/app/"
 
-  storage_support:
-    container_name: storage_support
-    build:
-      context: .
-      dockerfile: ./storage_support/docker/Dockerfile
+  webdav:
     volumes:
-      - "storage:/tmp/camera/"
-      - "/home/ekirill/projects/ekirill/storage_support/src/:/app/"
-    env_file: .env
-    environment:
-      - EKIRILL_STORAGE_DIR=/tmp/camera/
-
-volumes:
-  storage:
+      - "storage:/tmp/webdav/"
+      - "./webdav/src/:/app/"

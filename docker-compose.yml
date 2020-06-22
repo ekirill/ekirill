@@ -4,29 +4,38 @@ services:
   back:
     container_name: back
     build:
-      context: .
-      dockerfile: ./back/docker/Dockerfile
+      context: ./back/
+      dockerfile: docker/Dockerfile
     volumes:
-      - "storage:/tmp/camera/:ro"
+      - storage:/tmp/webdav/:ro
     env_file: .env
     environment:
-      - EKIRILL_CAMERA_VIDEODIR=/tmp/camera/
+      - EKIRILL_CAMERA_VIDEODIR=/tmp/webdav/
       - EKIRILL_DB_DEFAULT_HOST=db
     ports:
       - "8176:8176"
+    networks:
+      - ekirill
     command: ["uvicorn", "ekirill.app:app", "--host", "0.0.0.0", "--workers", "3", "--limit-concurrency", "10", "--port", "8176"]
 
-  storage_support:
-    container_name: storage_support
+  webdav:
+    container_name: webdav
     build:
-      context: .
-      dockerfile: ./storage_support/docker/Dockerfile
+      context: ./webdav/
+      dockerfile: docker/Dockerfile
     volumes:
-      - "storage:/tmp/camera/"
+      - storage:/tmp/webdav/
     env_file: .env
+    ports:
+      - "8178:80"
     environment:
-      - EKIRILL_STORAGE_DIR=/tmp/camera/
-    command: ['python', '-u', '/app/size_watcher.py']
+      - EKIRILL_STORAGE_DIR=/tmp/webdav/
+    restart: always
+    networks:
+      - ekirill
 
 volumes:
   storage:
+
+networks:
+  ekirill:
