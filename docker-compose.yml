@@ -10,7 +10,7 @@ services:
       - storage:/tmp/webdav/:ro
     env_file: .env
     environment:
-      - EKIRILL_CAMERA_VIDEODIR=/tmp/webdav/
+      - EKIRILL_CAMERA_VIDEODIR=/tmp/webdav/CAMERA/
       - EKIRILL_DB_DEFAULT_HOST=db
     expose:
       - "8176"
