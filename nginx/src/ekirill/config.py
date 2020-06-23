@@ -20,6 +20,7 @@ class AppConfig:
         with env.prefixed('EKIRILL_'):
             self.tz = env('TZ', 'Europe/Moscow')
             self.tzinfo = pytz.timezone(self.tz)
+            self.log_file = env('LOG', '/dev/stdout')
 
             self.storage = Storage(env)
 

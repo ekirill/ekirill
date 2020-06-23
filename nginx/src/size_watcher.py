@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 import heapq
 import os
+import sys
 import time
+import daemon
+import logging
 
 from ekirill.common import file_is_free
 from ekirill.config import app_config
 
 
+
 class SizeWatcher:
-    def __init__(self, path: str, max_size_gb: float, full_recheck_every: int):
+    def __init__(self, path: str, max_size_gb: float, full_recheck_every: int, logger):
         self._reset()
         self._path = path
         self._max_size_gb = max_size_gb
         self._full_recheck_every = full_recheck_every
+        self._logger = logger
 
     @property
     def _size_in_gb(self) -> float:
@@ -28,20 +33,20 @@ class SizeWatcher:
             heapq.heappush(self._heap, (file_ctime, file_name, file_size))
             self._size += file_size
 
-            print(f'Added {file_name}, total size now is: {self._size_in_gb} Gb')
+            self._logger.debug(f'Added {file_name}, total size now is: {self._size_in_gb} Gb')
 
     def _remove_file(self):
         """
         Removes the oldest file
         """
         _, file_name, file_size = heapq.heappop(self._heap)
-        print(f'Removing `{file_name}`')
+        self._logger.debug(f'Removing `{file_name}`')
         try:
             os.unlink(file_name)
             self._files.remove(file_name)
             self._size -= file_size
         except IOError as e:
-            print(f'Failed, skipping: {e}')
+            self._logger.warning(f'Failed, skipping: {e}')
 
     def _forget_files(self, file_names):
         new_heap = []
@@ -49,7 +54,7 @@ class SizeWatcher:
             if file_name in file_names:
                 self._files.remove(file_name)
                 self._size -= file_size
-                print(f'File {file_name} disappeared, total size now is: {self._size_in_gb} Gb')
+                self._logger.debug(f'File {file_name} disappeared, total size now is: {self._size_in_gb} Gb')
             else:
                 new_heap.append((file_ctime, file_name, file_size))
         heapq.heapify(new_heap)
@@ -72,7 +77,7 @@ class SizeWatcher:
 
     def _clean(self):
         if self._size_in_gb > self._max_size_gb:
-            print(f'Size exceeds {self._max_size_gb} Gb')
+            self._logger.debug(f'Size exceeds {self._max_size_gb} Gb')
             while self._size_in_gb > self._max_size_gb and len(self._heap):
                 self._remove_file()
 
@@ -85,7 +90,7 @@ class SizeWatcher:
     def run(self):
         while True:
             if time.time() - self._last_recheck >= self._full_recheck_every:
-                print('Time to full recheck.')
+                self._logger.debug('Time to full recheck.')
                 self._reset()
 
             self._get_new_files()
@@ -93,7 +98,28 @@ class SizeWatcher:
             time.sleep(60)
 
 
+def get_logger():
+    logger = logging.getLogger('SizeWatcher')
+    logger.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('SIZE_WATCHER: %(asctime)s\t%(levelname)s\t%(message)s')
+    ch = logging.StreamHandler(stream=sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+    return logger
+
+
 if __name__ == '__main__':
-    print(f'Start watching the storage. `{app_config.storage.dir}`')
-    watcher = SizeWatcher(app_config.storage.dir, app_config.storage.max_size_gb, app_config.storage.full_recheck_every)
-    watcher.run()
+    with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr):
+        logger = get_logger()
+
+        logger.info(f'Start watching the storage. `{app_config.storage.dir}`')
+        watcher = SizeWatcher(
+            app_config.storage.dir,
+            app_config.storage.max_size_gb,
+            app_config.storage.full_recheck_every,
+            logger=logger,
+        )
+        watcher.run()

@@ -6,7 +6,9 @@ services:
       - "storage:/tmp/webdav/:ro"
       - "./back/src/:/app/"
 
-  webdav:
+  nginx:
     volumes:
-      - "storage:/tmp/webdav/"
-      - "./webdav/src/:/app/"
+      - "storage:/var/www/webdav/"
+      - "./nginx/src/:/app/"
+    ports:
+      - "80:80"

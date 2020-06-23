@@ -12,29 +12,23 @@ services:
     environment:
       - EKIRILL_CAMERA_VIDEODIR=/tmp/webdav/
       - EKIRILL_DB_DEFAULT_HOST=db
-    ports:
-      - "8176:8176"
-    networks:
-      - ekirill
+    expose:
+      - "8176"
     command: ["uvicorn", "ekirill.app:app", "--host", "0.0.0.0", "--workers", "3", "--limit-concurrency", "10", "--port", "8176"]
 
-  webdav:
-    container_name: webdav
+  nginx:
+    container_name: nginx
     build:
-      context: ./webdav/
+      context: ./nginx/
       dockerfile: docker/Dockerfile
     volumes:
-      - storage:/tmp/webdav/
+      - storage:/var/www/webdav/
     env_file: .env
-    ports:
-      - "8178:80"
     environment:
-      - EKIRILL_STORAGE_DIR=/tmp/webdav/
-    networks:
-      - ekirill
+      - EKIRILL_STORAGE_DIR=/var/www/webdav/
+      - EKIRILL_LOG=/var/log/nginx/access.log
+    depends_on:
+      - back
 
 volumes:
   storage:
-
-networks:
-  ekirill:

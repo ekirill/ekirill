@@ -1,0 +1,49 @@
+upstream ekirill_backend {
+    server back:8176 fail_timeout=5s max_fails=5;
+}
+
+server {
+    listen 80 default_server;
+
+    root /var/www/;
+
+    server_name _;
+
+    location / {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect off;
+        proxy_buffering off;
+        proxy_pass http://ekirill_backend;
+    }
+
+    location /webdav/ {
+        client_max_body_size 300M;
+        client_body_temp_path /tmp/upload/;
+
+        # Сюда будут загружаться файлы
+        alias /var/www/webdav/;
+
+        # Разрешаем чтение и удаление
+        dav_access user:rw group:rw all:rw;
+
+        # Все методы для удобства работы (с возможностью удаления)
+        dav_methods PUT DELETE MKCOL COPY MOVE;
+
+        # Требуется для некоторых webdav клиентов (Cyberduck и Monosnap)
+        dav_ext_methods   PROPFIND OPTIONS;
+
+        # Чтобы клиенты могли создавать путь сами
+        create_full_put_path on;
+        charset utf-8;
+
+        # Возможность просмотра каталога
+        autoindex on;
+
+        # Включаем авторизоацию для загрузки файлов
+        auth_basic "Upload directory";
+        auth_basic_user_file /etc/nginx/htpasswd;
+    }
+
+}

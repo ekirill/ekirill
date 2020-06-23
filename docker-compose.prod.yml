@@ -4,5 +4,7 @@ services:
   back:
     restart: always
 
-  webdav:
+  nginx:
+    ports:
+      - "8178:80"
     restart: always

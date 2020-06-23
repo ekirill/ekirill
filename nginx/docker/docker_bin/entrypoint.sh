@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 for f in /docker_bin/init/*; do
-    ${f} "$@"
+    ${f} $@
 done
