@@ -25,6 +25,7 @@ class Camera:
     def __init__(self, env):
         with env.prefixed('CAMERA_'):
             self.videodir = env('VIDEODIR')
+            self.default_thumb_filename = 'CURRENT.jpg'
 
 
 class Webdav:
@@ -41,10 +42,18 @@ class GoogleOAuthSettings:
             self.secret = env('SECRET', '')
 
 
+class BasicAuthSettings:
+    def __init__(self, env):
+        with env.prefixed('BASIC_'):
+            self.username = env('USERNAME', '')
+            self.password = env('PASSWORD', '')
+
+
 class Auth:
     def __init__(self, env):
         with env.prefixed('AUTH_'):
             self.google = GoogleOAuthSettings(env)
+            self.basic = BasicAuthSettings(env)
 
 
 class AppConfig:

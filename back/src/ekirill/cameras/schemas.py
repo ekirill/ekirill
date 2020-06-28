@@ -1,12 +1,13 @@
 import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, AnyHttpUrl
 
 
 class Camera(BaseModel):
     uid: str
     caption: str
+    thumb: Optional[AnyHttpUrl]
 
 
 class CameraEvent(BaseModel):
@@ -18,5 +19,5 @@ class CameraEvent(BaseModel):
 
 class PaginatedCameraEvents(BaseModel):
     previous: Optional[str]
-    next: Optional[HttpUrl]
+    next: Optional[AnyHttpUrl]
     items: List[CameraEvent]

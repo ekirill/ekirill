@@ -8,7 +8,7 @@ app = FastAPI()
 
 app.include_router(
     cameras_router_v1,
-    prefix='/v1/cameras',
+    prefix='/api/v1/cameras',
     tags=['cameras'],
 )
 

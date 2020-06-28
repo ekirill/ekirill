@@ -8,11 +8,29 @@ from ekirill.common.dt import make_aware
 from ekirill.core.config import app_config
 
 
-def get_camera(camera_uid) -> schemas.Camera:
-    return schemas.Camera(
-        uid=camera_uid,
-        caption=camera_uid,
-    )
+def get_camera_thumb_file(camera_uid: str) -> Optional[str]:
+    thumb_file = os.path.join(app_config.camera.videodir, camera_uid, app_config.camera.default_thumb_filename)
+    if os.path.exists(thumb_file):
+        return thumb_file
+
+
+def get_camera_event_file(camera_uid: str, event_uid: str) -> Optional[str]:
+    event_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid)
+    if os.path.exists(event_file):
+        return event_file
+
+
+def get_camera(camera_uid: str) -> schemas.Camera:
+    camera_data = {
+        "uid": camera_uid,
+        "caption": camera_uid,
+    }
+    thumb_file = get_camera_thumb_file(camera_uid)
+    if thumb_file:
+        from ekirill.app import app
+        camera_data["thumb"] = \
+            app.url_path_for('camera_thumb', camera_uid=camera_uid).make_absolute_url(app_config.base_url)
+    return schemas.Camera(**camera_data)
 
 
 def get_cameras_list() -> List[schemas.Camera]:

@@ -3,8 +3,9 @@ version: '3.6'
 services:
   back:
     volumes:
-      - "storage:/tmp/webdav/:ro"
+      - "/Users/ekirill/tmp/camera/:/tmp/webdav/:ro"
       - "./back/src/:/app/"
+    command: ["uvicorn", "ekirill.app:app", "--host", "0.0.0.0", "--reload", "--port", "8176"]
 
   nginx:
     volumes:
