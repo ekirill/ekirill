@@ -6,9 +6,8 @@ import time
 import daemon
 import logging
 
-from ekirill.common import file_is_free
+from ekirill.common import file_is_free, get_logger
 from ekirill.config import app_config
-
 
 
 class SizeWatcher:
@@ -98,22 +97,9 @@ class SizeWatcher:
             time.sleep(60)
 
 
-def get_logger():
-    logger = logging.getLogger('SizeWatcher')
-    logger.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter('SIZE_WATCHER: %(asctime)s\t%(levelname)s\t%(message)s')
-    ch = logging.StreamHandler(stream=sys.stdout)
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-
-    return logger
-
-
 if __name__ == '__main__':
     with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr):
-        logger = get_logger()
+        logger = get_logger('SizeWatcher', 'SIZE_WATCHER')
 
         logger.info(f'Start watching the storage. `{app_config.storage.dir}`')
         watcher = SizeWatcher(

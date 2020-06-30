@@ -6,6 +6,14 @@ default_env = Env()
 default_env.read_env()
 
 
+class Thumbnails:
+    def __init__(self, env):
+        with env.prefixed('THUMB_'):
+            self.ext = env('EXT', 'jpg')
+            self.width = env.int('WIDTH', 320)
+            self.height = env.int('HEIGHT', 180)
+
+
 class Storage:
     def __init__(self, env):
         with env.prefixed('STORAGE_'):
@@ -23,6 +31,7 @@ class AppConfig:
             self.log_file = env('LOG', '/dev/stdout')
 
             self.storage = Storage(env)
+            self.thumbnails = Thumbnails(env)
 
 
 app_config = AppConfig()

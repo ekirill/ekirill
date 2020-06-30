@@ -7,7 +7,7 @@ from starlette.responses import FileResponse
 from ekirill.cameras import schemas
 from ekirill.cameras.exceptions import CameraDoesNotExist
 from ekirill.cameras.services.cameras import get_cameras_list, get_camera_events, get_camera_thumb_file, \
-    get_camera_event_file
+    get_camera_event_file, get_camera_event_thumbnail_file
 from ekirill.common.pagination.per_page_paginator import Paginator
 from ekirill.common.schemas import ApiError
 from ekirill.core.auth import get_current_user
@@ -66,3 +66,14 @@ async def camera_event(camera_uid: str, event_uid: str, user: str = Depends(get_
             detail="Event for camera does not exist",
         )
     return FileResponse(event_file, media_type="video/mp4")
+
+
+@router.get("/{camera_uid}/events/{event_uid}/thumb/")
+async def camera_event_thumb(camera_uid: str, event_uid: str, user: str = Depends(get_current_user)):
+    thumb_file = get_camera_event_thumbnail_file(camera_uid, event_uid)
+    if not thumb_file:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Thumbnail for event for camera does not exist",
+        )
+    return FileResponse(thumb_file, media_type="image/jpeg")

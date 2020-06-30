@@ -15,6 +15,8 @@ class CameraEvent(BaseModel):
     start_time: datetime.datetime
     end_time: datetime.datetime
     duration: int
+    video: AnyHttpUrl
+    thumb: Optional[AnyHttpUrl]
 
 
 class PaginatedCameraEvents(BaseModel):

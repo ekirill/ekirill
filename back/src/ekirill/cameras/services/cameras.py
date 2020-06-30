@@ -20,6 +20,12 @@ def get_camera_event_file(camera_uid: str, event_uid: str) -> Optional[str]:
         return event_file
 
 
+def get_camera_event_thumbnail_file(camera_uid: str, event_uid: str) -> Optional[str]:
+    thumbnail_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid + '.jpg')
+    if os.path.exists(thumbnail_file):
+        return thumbnail_file
+
+
 def get_camera(camera_uid: str) -> schemas.Camera:
     camera_data = {
         "uid": camera_uid,
@@ -59,12 +65,25 @@ def get_camera_event(camera_uid, event_uid) -> Optional[schemas.CameraEvent]:
     except (ValueError, TypeError):
         return None
 
-    return schemas.CameraEvent(
-        uid=event_uid,
-        start_time=start_dt,
-        end_time=start_dt + datetime.timedelta(seconds=duration),
-        duration=duration,
-    )
+    from ekirill.app import app
+
+    event_data = {
+        'uid': event_uid,
+        'start_time': start_dt,
+        'end_time': start_dt + datetime.timedelta(seconds=duration),
+        'duration': duration,
+        'video': app.url_path_for(
+            'camera_event', camera_uid=camera_uid, event_uid=event_uid
+        ).make_absolute_url(app_config.base_url),
+    }
+
+    thumb_file = get_camera_event_thumbnail_file(camera_uid, event_uid)
+    if thumb_file:
+        event_data['thumb'] = app.url_path_for(
+            'camera_event_thumb', camera_uid=camera_uid, event_uid=event_uid
+        ).make_absolute_url(app_config.base_url)
+
+    return schemas.CameraEvent(**event_data)
 
 
 def get_camera_events(camera_uid: str) -> List[schemas.CameraEvent]:

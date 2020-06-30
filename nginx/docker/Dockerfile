@@ -5,6 +5,7 @@ RUN apt-get update \
     && apt-get install -y \
         apache2-utils \
         build-essential \
+        ffmpeg \
         python3 \
         python3-dev \
         python3-pip \

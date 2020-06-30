@@ -9,7 +9,7 @@ services:
 
   nginx:
     volumes:
-      - "storage:/var/www/webdav/"
+      - "/Users/ekirill/tmp/camera/:/var/www/webdav/"
       - "./nginx/src/:/app/"
     ports:
       - "80:80"
