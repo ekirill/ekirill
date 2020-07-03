@@ -15,13 +15,13 @@ def get_camera_thumb_file(camera_uid: str) -> Optional[str]:
 
 
 def get_camera_event_file(camera_uid: str, event_uid: str) -> Optional[str]:
-    event_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid)
+    event_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid) + '.mp4'
     if os.path.exists(event_file):
         return event_file
 
 
 def get_camera_event_thumbnail_file(camera_uid: str, event_uid: str) -> Optional[str]:
-    thumbnail_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid + '.jpg')
+    thumbnail_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid + '.mp4.jpg')
     if os.path.exists(thumbnail_file):
         return thumbnail_file
 
@@ -47,10 +47,11 @@ def get_cameras_list() -> List[schemas.Camera]:
 
 
 def get_camera_event(camera_uid, event_uid) -> Optional[schemas.CameraEvent]:
-    if not event_uid.endswith('.mp4'):
+    file_name = os.path.join(app_config.camera.videodir, camera_uid, event_uid) + '.mp4'
+    if not os.path.exists(file_name):
         return None
 
-    file_size = os.path.getsize(os.path.join(app_config.camera.videodir, camera_uid, event_uid))
+    file_size = os.path.getsize(file_name)
     duration = min(120, max(3, int(file_size / 1024 / 700)))
     dt_parts = event_uid.split('_')
     if len(dt_parts) < 4:
@@ -94,7 +95,8 @@ def get_camera_events(camera_uid: str) -> List[schemas.CameraEvent]:
     events = []
     for dirpath, dirnames, files in os.walk(camera_videos_path):
         for filename in files:
-            ev = get_camera_event(camera_uid, filename)
+            event_uid, _ = filename.rsplit('.', 1)
+            ev = get_camera_event(camera_uid, event_uid)
             if not ev:
                 continue
             events.append(ev)

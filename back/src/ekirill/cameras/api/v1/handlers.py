@@ -46,7 +46,7 @@ def camera_events(camera_uid: str, paginator: Paginator = Depends(Paginator), us
         return JSONResponse(status_code=404, content={"detail": "Camera not found"})
 
 
-@router.get("/{camera_uid}/thumb/")
+@router.get("/{camera_uid}/thumb.jpg")
 async def camera_thumb(camera_uid: str, user: str = Depends(get_current_user)):
     thumb_file = get_camera_thumb_file(camera_uid)
     if not thumb_file:
@@ -57,7 +57,7 @@ async def camera_thumb(camera_uid: str, user: str = Depends(get_current_user)):
     return FileResponse(thumb_file, media_type="image/jpeg")
 
 
-@router.get("/{camera_uid}/events/{event_uid}/")
+@router.get("/{camera_uid}/events/{event_uid}.mp4")
 async def camera_event(camera_uid: str, event_uid: str, user: str = Depends(get_current_user)):
     event_file = get_camera_event_file(camera_uid, event_uid)
     if not event_file:
@@ -68,8 +68,8 @@ async def camera_event(camera_uid: str, event_uid: str, user: str = Depends(get_
     return FileResponse(event_file, media_type="video/mp4")
 
 
-@router.get("/{camera_uid}/events/{event_uid}/thumb/")
-async def camera_event_thumb(camera_uid: str, event_uid: str, user: str = Depends(get_current_user)):
+@router.get("/{camera_uid}/events/{event_uid}.jpg")
+async def camera_event_thumb(camera_uid: str, event_uid: str):
     thumb_file = get_camera_event_thumbnail_file(camera_uid, event_uid)
     if not thumb_file:
         raise HTTPException(
