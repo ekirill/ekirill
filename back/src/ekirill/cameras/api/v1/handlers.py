@@ -58,7 +58,7 @@ async def camera_thumb(camera_uid: str, user: str = Depends(get_current_user)):
 
 
 @router.get("/{camera_uid}/events/{event_uid}.mp4")
-async def camera_event(camera_uid: str, event_uid: str, user: str = Depends(get_current_user)):
+async def camera_event(camera_uid: str, event_uid: str):
     event_file = get_camera_event_file(camera_uid, event_uid)
     if not event_file:
         raise HTTPException(
