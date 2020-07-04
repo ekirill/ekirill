@@ -20,6 +20,10 @@ def get_camera_event_file(camera_uid: str, event_uid: str) -> Optional[str]:
         return event_file
 
 
+def get_camera_event_xaccel_path(camera_uid: str, event_uid: str) -> Optional[str]:
+    return '/protected_cameras/' + os.path.join(camera_uid, event_uid) + '.mp4'
+
+
 def get_camera_event_thumbnail_file(camera_uid: str, event_uid: str) -> Optional[str]:
     thumbnail_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid + '.mp4.jpg')
     if os.path.exists(thumbnail_file):

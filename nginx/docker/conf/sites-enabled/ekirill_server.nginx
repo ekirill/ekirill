@@ -18,6 +18,11 @@ server {
         proxy_pass http://ekirill_backend;
     }
 
+    location /protected_cameras/ {
+      internal;
+      alias /var/www/webdav/CAMERA/;
+    }
+
     location /webdav/ {
         client_max_body_size 300M;
         client_body_temp_path /tmp/upload/;
