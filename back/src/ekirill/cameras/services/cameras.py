@@ -14,6 +14,10 @@ def get_camera_thumb_file(camera_uid: str) -> Optional[str]:
         return thumb_file
 
 
+def get_camera_thumbnail_xaccel_path(camera_uid: str) -> Optional[str]:
+    return '/protected_cameras/' + os.path.join(camera_uid, app_config.camera.default_thumb_filename)
+
+
 def get_camera_event_file(camera_uid: str, event_uid: str) -> Optional[str]:
     event_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid) + '.mp4'
     if os.path.exists(event_file):
@@ -28,6 +32,10 @@ def get_camera_event_thumbnail_file(camera_uid: str, event_uid: str) -> Optional
     thumbnail_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid + '.mp4.jpg')
     if os.path.exists(thumbnail_file):
         return thumbnail_file
+
+
+def get_camera_event_thumbnail_xaccel_path(camera_uid: str, event_uid: str) -> Optional[str]:
+    return '/protected_cameras/' + os.path.join(camera_uid, event_uid) + '.mp4.jpg'
 
 
 def get_camera(camera_uid: str) -> schemas.Camera:

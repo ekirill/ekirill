@@ -1,14 +1,18 @@
-import os
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from starlette.responses import FileResponse, Response
+from starlette.responses import Response
 
 from ekirill.cameras import schemas
 from ekirill.cameras.exceptions import CameraDoesNotExist
-from ekirill.cameras.services.cameras import get_cameras_list, get_camera_events, get_camera_thumb_file, \
-    get_camera_event_file, get_camera_event_thumbnail_file, get_camera_event_xaccel_path
+from ekirill.cameras.services.cameras import (
+    get_camera_event_thumbnail_xaccel_path,
+    get_camera_event_xaccel_path,
+    get_camera_events,
+    get_camera_thumbnail_xaccel_path,
+    get_cameras_list,
+)
 from ekirill.common.pagination.per_page_paginator import Paginator
 from ekirill.common.schemas import ApiError
 from ekirill.core.auth import get_current_user
@@ -48,14 +52,14 @@ def camera_events(camera_uid: str, paginator: Paginator = Depends(Paginator), us
 
 
 @router.get("/{camera_uid}/thumb.jpg")
-async def camera_thumb(camera_uid: str, user: str = Depends(get_current_user)):
-    thumb_file = get_camera_thumb_file(camera_uid)
-    if not thumb_file:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Thumbnail for camera does not exist",
-        )
-    return FileResponse(thumb_file, media_type="image/jpeg", stat_result=os.stat(thumb_file))
+async def camera_thumb(camera_uid: str):
+    return Response(
+        status_code=200,
+        headers={
+            "X-Accel-Redirect": get_camera_thumbnail_xaccel_path(camera_uid)
+        },
+        media_type="image/jpeg",
+    )
 
 
 @router.get("/{camera_uid}/events/{event_uid}.mp4")
@@ -71,10 +75,10 @@ def camera_event(camera_uid: str, event_uid: str):
 
 @router.get("/{camera_uid}/events/{event_uid}.jpg")
 async def camera_event_thumb(camera_uid: str, event_uid: str):
-    thumb_file = get_camera_event_thumbnail_file(camera_uid, event_uid)
-    if not thumb_file:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Thumbnail for event for camera does not exist",
-        )
-    return FileResponse(thumb_file, media_type="image/jpeg", stat_result=os.stat(thumb_file))
+    return Response(
+        status_code=200,
+        headers={
+            "X-Accel-Redirect": get_camera_event_thumbnail_xaccel_path(camera_uid, event_uid)
+        },
+        media_type="image/jpeg",
+    )
