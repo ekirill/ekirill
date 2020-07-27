@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-import heapq
 import os
 import subprocess
 import sys
 import time
-from typing import Set, List
+from typing import Set
 
 import daemon
-import logging
 
 from ekirill.common import file_is_free, get_logger
 from ekirill.config import app_config
@@ -19,6 +17,7 @@ class ThumbMaker:
         self._ext = ext
         self._width = width
         self._height = height
+        self._broken = set()
         self._logger = logger
 
     def _get_new_files(self) -> Set:
@@ -43,6 +42,9 @@ class ThumbMaker:
 
     def _make_thumbnails(self, files: Set[str]):
         for file_name in files:
+            if file_name in self._broken:
+                continue
+
             if os.path.exists(file_name):
                 thumb_filename = f'{file_name}.{self._ext}'
                 try:
@@ -68,6 +70,7 @@ class ThumbMaker:
                         self._logger.info(f'Created {thumb_filename}')
                 except Exception as e:
                     self._logger.error("Error processing `%s`", file_name)
+                    self._broken.add(file_name)
 
     def run(self):
         while True:
