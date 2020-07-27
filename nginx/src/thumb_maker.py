@@ -66,8 +66,13 @@ class ThumbMaker:
                             file_name,
                             result.stdout.decode('utf-8'), result.stderr.decode('utf-8')
                         )
+                        self._broken.add(file_name)
                     else:
-                        self._logger.info(f'Created {thumb_filename}')
+                        if os.path.exists(thumb_filename):
+                            self._logger.info(f'Created {thumb_filename}')
+                        else:
+                            self._logger.info(f'Could not generate thumb for {file_name}. Dunno why.')
+                            self._broken.add(file_name)
                 except Exception as e:
                     self._logger.error("Error processing `%s`", file_name)
                     self._broken.add(file_name)
