@@ -4,7 +4,6 @@ import os
 import sys
 import time
 import daemon
-import logging
 
 from ekirill.common import file_is_free, get_logger
 from ekirill.config import app_config
@@ -28,7 +27,7 @@ class SizeWatcher:
             self._files.add(file_name)
 
             file_size = os.path.getsize(file_name)
-            file_ctime = time.ctime(os.path.getctime(file_name))
+            file_ctime = os.path.getctime(file_name)
             heapq.heappush(self._heap, (file_ctime, file_name, file_size))
             self._size += file_size
 
@@ -63,6 +62,11 @@ class SizeWatcher:
         seen = set()
         for root, _, files in os.walk(self._path):
             for file in files:
+
+                # processing only video files and thumbs
+                if 'mp4' not in file.lower():
+                    continue
+
                 file_name = os.path.join(root, file)
                 if file_is_free(file_name):
                     # if file is used by another process, it may being written right now, skipping
@@ -92,8 +96,12 @@ class SizeWatcher:
                 self._logger.debug('Time to full recheck.')
                 self._reset()
 
-            self._get_new_files()
-            self._clean()
+            try:
+                self._get_new_files()
+                self._clean()
+            except Exception as e:
+                self._logger(f'Error processing files: {e}')
+
             time.sleep(60)
 
 
