@@ -30,5 +30,20 @@ services:
     depends_on:
       - back
 
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:0.4.2
+    container_name: nginx-exporter
+    restart: unless-stopped
+    environment:
+      - SCRAPE_URI=http://nginx/nginx_status
+      - TELEMETRY_PATH=/metrics
+      - NGINX_RETRIES=10
+    ports:
+      - "9113:9113"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+
 volumes:
   storage:
