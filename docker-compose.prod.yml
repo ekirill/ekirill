@@ -4,6 +4,9 @@ services:
   back:
     restart: always
 
+  web:
+    restart: always
+
   nginx:
     ports:
       - "8178:80"

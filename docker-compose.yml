@@ -14,7 +14,41 @@ services:
       - EKIRILL_DB_DEFAULT_HOST=db
     expose:
       - "8176"
-    command: ["uvicorn", "ekirill.app:app", "--host", "0.0.0.0", "--workers", "3", "--limit-concurrency", "10", "--port", "8176"]
+    command:
+      - "uvicorn"
+      - "ekirill.app:app"
+      - "--host"
+      - "0.0.0.0"
+      - "--workers"
+      - "2"
+      - "--limit-concurrency"
+      - "10"
+      - "--port"
+      - "8176"
+
+  web:
+    container_name: web
+    build:
+      context: ./web/
+      dockerfile: docker/Dockerfile
+    env_file: .env
+    environment:
+      - PYTHONPATH=/app
+      - DJANGO_SETTINGS_MODULE=ekirill.settings
+    expose:
+      - "8177"
+    command:
+      - "uwsgi"
+      - "--chdir=/app/"
+      - "--check-static=/app/htdocs"
+      - "--module=ekirill.wsgi:application"
+      - "--master"
+      - "--http=0.0.0.0:8177"
+      - "--processes=2"
+      - "--harakiri=300"
+      - "--max-requests=5000"
+      - "--enable-threads"
+      - "--vacuum"
 
   nginx:
     container_name: nginx
@@ -29,6 +63,7 @@ services:
       - EKIRILL_LOG=/var/log/nginx/access.log
     depends_on:
       - back
+      - web
 
   nginx-exporter:
     image: nginx/nginx-prometheus-exporter:0.4.2

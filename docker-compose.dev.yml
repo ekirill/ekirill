@@ -3,13 +3,26 @@ version: '3.6'
 services:
   back:
     volumes:
-      - "/Users/ekirill/tmp/camera/:/tmp/webdav/:ro"
       - "./back/src/:/app/"
-    command: ["uvicorn", "ekirill.app:app", "--host", "0.0.0.0", "--reload", "--port", "8176"]
+    command: 
+      - "uvicorn"
+      - "ekirill.app:app"
+      - "--host"
+      - "0.0.0.0"
+      - "--reload"
+      - "--port"
+      - "8176"
+    ports:
+      - "8176:8176"
+
+  web:
+    volumes:
+      - "./web/src/:/app/"
+    ports:
+      - "8177:8177"
 
   nginx:
     volumes:
-      - "/Users/ekirill/tmp/camera/:/var/www/webdav/"
       - "./nginx/src/:/app/"
     ports:
       - "80:80"

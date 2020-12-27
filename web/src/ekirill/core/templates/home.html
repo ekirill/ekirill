@@ -1,0 +1,93 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>eKirill заметки</title>
+    <style>
+        body {
+            background-color: #111111;
+            color: aliceblue;
+        }
+        body>.row {
+          display: flex;
+        }
+        body>.row>.column-left {
+            flex: 1 0;
+            display: flex;
+            flex-direction: column;
+        }
+        body>.row>.column-right {
+            flex: 0 0 500px;
+        }
+        body>.row>.column-left>.top {
+            flex: 0 0 100px;
+            border-bottom: #8e02e2 1px solid;
+            font-family: fantasy;
+            font-size: 3em;
+        }
+        body>.row>.column-left>.content {
+            flex: 1 0;
+        }
+        .me-album {
+            border-spacing: 0;
+            table-layout:fixed;
+            width: 482px;
+            height: 482px;
+        }
+        .me-album tr:not(:last-child) td{
+            border-bottom: #8e02e2 1px solid;
+        }
+        .me-album td:not(:last-child) {
+            border-right: #8e02e2 1px solid;
+        }
+        .me-album .thumb_me_young {
+            padding: 0;
+            margin: 0;
+            width: 160px;
+            height: 160px;
+            vertical-align: center;
+            text-align: center;
+        }
+        .me-album .thumb_me_now {
+            padding: 0;
+            margin: 0;
+            width: 322px;
+            height: 322px;
+            vertical-align: center;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="row">
+        <div class="column-left">
+            <div class="top">
+                eKirill / заметки
+            </div>
+            <div class="content">
+
+            </div>
+        </div>
+        <div class="column-right">
+            <table class="me-album">
+                <tr>
+                    <td colspan="2" rowspan="2" class="thumb_me_now">
+                        <div class="frame"><img src="{% static 'img/me/me_now.webp' %}" alt="ekirill now" width="290" height="290"></div>
+                    </td>
+                    <td class="thumb_me_young"><img src="{% static 'img/me/me_05.webp' %}" alt="ekirill 05" width="128" height="128"></td>
+                </tr>
+                <tr>
+                    <td class="thumb_me_young"><img src="{% static 'img/me/me_04.webp' %}" alt="ekirill 04" width="128" height="128"></td>
+                </tr>
+                <tr>
+                    <td class="thumb_me_young"><img src="{% static 'img/me/me_01.webp' %}" alt="ekirill 01" width="128" height="128"></td>
+                    <td class="thumb_me_young"><img src="{% static 'img/me/me_02.webp' %}" alt="ekirill 02" width="128" height="128"></td>
+                    <td class="thumb_me_young"><img src="{% static 'img/me/me_03.webp' %}" alt="ekirill 03" width="128" height="128"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
