@@ -71,6 +71,7 @@
             </div>
         </div>
         <div class="column-right">
+            <div>
             <table class="me-album">
                 <tr>
                     <td colspan="2" rowspan="2" class="thumb_me_now">
@@ -87,6 +88,12 @@
                     <td class="thumb_me_young"><img src="{% static 'img/me/me_03.webp' %}" alt="ekirill 03" width="128" height="128"></td>
                 </tr>
             </table>
+            </div>
+            <div class="auth-bar">
+                {% if user.is_authenticated %}
+                    {{ user.username }}
+                {% endif %}
+            </div>
         </div>
     </div>
 </body>

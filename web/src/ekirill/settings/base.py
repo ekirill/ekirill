@@ -26,8 +26,7 @@ SECRET_KEY = os.environ['EKIRILL_WEB_SECRET']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('EKIRILL_WEB_DEBUG', False)
 
-if not DEBUG:
-    ALLOWED_HOSTS = ["ekirill.ru"]
+ALLOWED_HOSTS = [os.environ.get('EKIRILL_WEB_HOST', 'ekirill.ru')]
 
 # Application definition
 
@@ -38,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'social_django',
 
     'ekirill.core',
 ]
@@ -65,6 +66,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -135,3 +139,15 @@ STATICFILES_DIRS = [
 
 # folder for prod staticfiles
 STATIC_ROOT = BASE_DIR / "htdocs" / "static"
+
+# AUTH
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend', # for superuser
+    'social_core.backends.google.GoogleOAuth2',
+]
+SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+SOCIAL_AUTH_USER_MODEL = 'auth.User'
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = not DEBUG
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('EKIRILL_WEB_AUTH_GOOGLE_OAUTH2_KEY', '')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('EKIRILL_WEB_AUTH_GOOGLE_OAUTH2_SECRET', '')
