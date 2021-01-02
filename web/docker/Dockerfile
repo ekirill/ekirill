@@ -3,6 +3,7 @@ FROM python:3.8.3-buster
 RUN apt-get update \
     && apt-get install -y \
         iproute2 \
+        netcat \
     && true
 RUN pip install --upgrade pip
 
