@@ -3,7 +3,10 @@ from django.http.response import HttpResponse
 from django.shortcuts import render
 
 from ekirill.cameras import repository
+from ekirill.common.auth import staff_required
 
+
+@staff_required
 def cameras_list(request: HttpRequest) -> HttpResponse:
     context = {
         'cameras': repository.get_cameras_list()
@@ -11,6 +14,7 @@ def cameras_list(request: HttpRequest) -> HttpResponse:
     return render(request, "cameras_list.html", context)
 
 
+@staff_required
 def camera_events_list(request: HttpRequest, camera_uid: str) -> HttpResponse:
     context = {
         'camera': repository.get_camera(camera_uid),
@@ -19,6 +23,7 @@ def camera_events_list(request: HttpRequest, camera_uid: str) -> HttpResponse:
     return render(request, "camera_events_list.html", context)
 
 
+@staff_required
 def camera_event(request: HttpRequest, camera_uid: str, event_uid: str) -> HttpResponse:
     context = {
         'camera': repository.get_camera(camera_uid),

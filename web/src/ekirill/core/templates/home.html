@@ -89,13 +89,6 @@
                 </tr>
             </table>
             </div>
-            <div class="auth-bar">
-                {% if user.is_authenticated %}
-                    {{ user.username }} | <a href="{% url "logout" %}">Выход</a>
-                {% else %}
-                    <a href="{% url "social:begin" "google-oauth2" %}">Вход</a>
-                {% endif %}
-            </div>
         </div>
     </div>
 </body>
