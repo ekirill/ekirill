@@ -1,23 +1,10 @@
 version: '3.6'
 
 services:
-  back:
-    volumes:
-      - "./back/src/:/app/"
-    command: 
-      - "uvicorn"
-      - "ekirill.app:app"
-      - "--host"
-      - "0.0.0.0"
-      - "--reload"
-      - "--port"
-      - "8176"
-    ports:
-      - "8176:8176"
-
   web:
     volumes:
       - "./web/src/:/app/"
+      - "../tmp_webdav/:/tmp/webdav/:ro"
     ports:
       - "8177:8177"
     depends_on:
@@ -26,6 +13,7 @@ services:
   nginx:
     volumes:
       - "./nginx/src/:/app/"
+      - "../tmp_webdav/:/var/www/webdav/"
     ports:
       - "80:80"
 

@@ -1,36 +1,13 @@
 version: '3.6'
 
 services:
-  back:
-    container_name: back
-    build:
-      context: ./back/
-      dockerfile: docker/Dockerfile
-    volumes:
-      - storage:/tmp/webdav/:ro
-    env_file: .env
-    environment:
-      - EKIRILL_CAMERA_VIDEODIR=/tmp/webdav/CAMERA/
-      - EKIRILL_DB_DEFAULT_HOST=db
-    expose:
-      - "8176"
-    command:
-      - "uvicorn"
-      - "ekirill.app:app"
-      - "--host"
-      - "0.0.0.0"
-      - "--workers"
-      - "2"
-      - "--limit-concurrency"
-      - "10"
-      - "--port"
-      - "8176"
-
   web:
     container_name: web
     build:
       context: ./web/
       dockerfile: docker/Dockerfile
+    volumes:
+      - storage:/tmp/webdav/:ro
     env_file: .env
     environment:
       - PYTHONPATH=/app
@@ -61,9 +38,6 @@ services:
     environment:
       - EKIRILL_STORAGE_DIR=/var/www/webdav/
       - EKIRILL_LOG=/var/log/nginx/access.log
-    depends_on:
-      - back
-      - web
 
   nginx-exporter:
     image: nginx/nginx-prometheus-exporter:0.4.2

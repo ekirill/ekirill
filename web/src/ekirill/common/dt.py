@@ -1,7 +1,7 @@
 import datetime
 from typing import Union
 
-from ekirill.core.config import app_config
+from django.utils.timezone import get_current_timezone
 
 
 def is_aware(dt: datetime.datetime) -> bool:
@@ -18,4 +18,4 @@ def make_aware(dt: Union[datetime.datetime, datetime.date]) -> Union[datetime.da
     if is_aware(dt):
         return dt
 
-    return app_config.tzinfo.localize(dt)
+    return get_current_timezone.localize(dt)

@@ -1,25 +1,28 @@
 import datetime
 import os
-from typing import List, Optional
+from typing import Optional, List
 
-from ekirill.cameras import schemas
+from django.conf import settings
+from django.utils.timezone import make_aware
+from django.urls import reverse
+
 from ekirill.cameras.exceptions import CameraDoesNotExist
-from ekirill.common.dt import make_aware
-from ekirill.core.config import app_config
+from ekirill.common.request import make_absolute_url
+from ekirill.cameras import models as camera_models
 
 
 def get_camera_thumb_file(camera_uid: str) -> Optional[str]:
-    thumb_file = os.path.join(app_config.camera.videodir, camera_uid, app_config.camera.default_thumb_filename)
+    thumb_file = os.path.join(settings.CAMERA_VIDEODIR, camera_uid, settings.CAMERA_NOW_IMAGE_NAME)
     if os.path.exists(thumb_file):
         return thumb_file
 
 
 def get_camera_thumbnail_xaccel_path(camera_uid: str) -> Optional[str]:
-    return '/protected_cameras/' + os.path.join(camera_uid, app_config.camera.default_thumb_filename)
+    return '/protected_cameras/' + os.path.join(camera_uid, settings.CAMERA_NOW_IMAGE_NAME)
 
 
 def get_camera_event_file(camera_uid: str, event_uid: str) -> Optional[str]:
-    event_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid) + '.mp4'
+    event_file = os.path.join(settings.CAMERA_VIDEODIR, camera_uid, event_uid) + '.mp4'
     if os.path.exists(event_file):
         return event_file
 
@@ -29,7 +32,7 @@ def get_camera_event_xaccel_path(camera_uid: str, event_uid: str) -> Optional[st
 
 
 def get_camera_event_thumbnail_file(camera_uid: str, event_uid: str) -> Optional[str]:
-    thumbnail_file = os.path.join(app_config.camera.videodir, camera_uid, event_uid + '.mp4.jpg')
+    thumbnail_file = os.path.join(settings.CAMERA_VIDEODIR, camera_uid, event_uid + '.mp4.jpg')
     if os.path.exists(thumbnail_file):
         return thumbnail_file
 
@@ -38,28 +41,31 @@ def get_camera_event_thumbnail_xaccel_path(camera_uid: str, event_uid: str) -> O
     return '/protected_cameras/' + os.path.join(camera_uid, event_uid) + '.mp4.jpg'
 
 
-def get_camera(camera_uid: str) -> schemas.Camera:
+def get_camera(camera_uid: str) -> camera_models.Camera:
     camera_data = {
         "uid": camera_uid,
         "caption": camera_uid,
     }
     thumb_file = get_camera_thumb_file(camera_uid)
     if thumb_file:
-        from ekirill.app import app
-        camera_data["thumb"] = \
-            app.url_path_for('camera_thumb', camera_uid=camera_uid).make_absolute_url(app_config.base_url)
-    return schemas.Camera(**camera_data)
+        camera_data["thumb"] = make_absolute_url(
+            reverse(
+                'camera_thumb',
+                kwargs={
+                    'camera_uid': camera_uid
+                },
+            )
+        )
+    return camera_models.Camera(**camera_data)
 
 
-def get_cameras_list() -> List[schemas.Camera]:
-    for dirpath, dirnames, files in os.walk(app_config.camera.videodir):
-        return [
-            get_camera(_dir) for _dir in sorted(dirnames)
-        ]
+def get_cameras_list() -> List[camera_models.Camera]:
+    for dirpath, dirnames, files in os.walk(settings.CAMERA_VIDEODIR):
+        return [get_camera(_dir) for _dir in sorted(dirnames)]
 
 
-def get_camera_event(camera_uid, event_uid) -> Optional[schemas.CameraEvent]:
-    file_name = os.path.join(app_config.camera.videodir, camera_uid, event_uid) + '.mp4'
+def get_camera_event(camera_uid, event_uid) -> Optional[camera_models.CameraEvent]:
+    file_name = os.path.join(settings.CAMERA_VIDEODIR, camera_uid, event_uid) + '.mp4'
     if not os.path.exists(file_name):
         return None
 
@@ -78,29 +84,41 @@ def get_camera_event(camera_uid, event_uid) -> Optional[schemas.CameraEvent]:
     except (ValueError, TypeError):
         return None
 
-    from ekirill.app import app
-
     event_data = {
         'uid': event_uid,
         'start_time': start_dt,
         'end_time': start_dt + datetime.timedelta(seconds=duration),
         'duration': duration,
-        'video': app.url_path_for(
-            'camera_event', camera_uid=camera_uid, event_uid=event_uid
-        ).make_absolute_url(app_config.base_url),
+        'video': make_absolute_url(
+            reverse(
+                'camera_event_video',
+                kwargs={
+                    'camera_uid': camera_uid,
+                    'event_uid': event_uid,
+                },
+            )
+        ),
     }
 
     thumb_file = get_camera_event_thumbnail_file(camera_uid, event_uid)
     if thumb_file:
-        event_data['thumb'] = app.url_path_for(
-            'camera_event_thumb', camera_uid=camera_uid, event_uid=event_uid
-        ).make_absolute_url(app_config.base_url)
+        event_data['thumb'] = make_absolute_url(
+            reverse(
+                'camera_event_thumb',
+                kwargs={
+                    'camera_uid': camera_uid,
+                    'event_uid': event_uid,
+                },
+            )
+        )
+    else:
+        event_data['thumb'] = None
 
-    return schemas.CameraEvent(**event_data)
+    return camera_models.CameraEvent(**event_data)
 
 
-def get_camera_events(camera_uid: str) -> List[schemas.CameraEvent]:
-    camera_videos_path = os.path.join(app_config.camera.videodir, camera_uid)
+def get_camera_events(camera_uid: str) -> List[camera_models.CameraEvent]:
+    camera_videos_path = os.path.join(settings.CAMERA_VIDEODIR, camera_uid)
     if not os.path.exists(camera_videos_path):
         raise CameraDoesNotExist()
 
@@ -120,7 +138,7 @@ def get_camera_events(camera_uid: str) -> List[schemas.CameraEvent]:
 
 
 def get_event_path(camera_uid, event_uid):
-    return os.path.join(app_config.camera.videodir, camera_uid, event_uid)
+    return os.path.join(settings.CAMERA_VIDEODIR, camera_uid, event_uid)
 
 
 def get_event_internal_url(camera_uid, event_uid):

@@ -24,5 +24,7 @@ urlpatterns = [
     path('', include('social_django.urls', namespace='social')),
     path('accounts/', include('django.contrib.auth.urls')),
 
-    path('', home, name="home")
+    path('', home, name="home"),
+    path('cameras/', include('ekirill.cameras.urls')),
+    path('api/v1/cameras/', include('ekirill.cameras.api.urls')),
 ]

@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-import os
 from pathlib import Path
+
+from .conf import env_conf
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # in case oth this project - its `src` folder
@@ -21,12 +22,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['EKIRILL_WEB_SECRET']
+SECRET_KEY = env_conf.secret
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('EKIRILL_WEB_DEBUG', False)
+DEBUG = env_conf.debug
 
-ALLOWED_HOSTS = [os.environ.get('EKIRILL_WEB_HOST', 'ekirill.ru')]
+IS_PROD = not DEBUG
+IS_HTTPS = IS_PROD
+
+HOSTNAME = env_conf.hostname
+ALLOWED_HOSTS = [HOSTNAME]
 
 # Application definition
 
@@ -38,9 +43,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
     'social_django',
 
     'ekirill.core',
+    'ekirill.cameras',
 ]
 
 MIDDLEWARE = [
@@ -83,10 +90,10 @@ WSGI_APPLICATION = 'ekirill.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': os.environ['EKIRILL_WEB_DB_HOST'],
-        'NAME': os.environ['EKIRILL_WEB_DB_NAME'],
-        'USER': os.environ['EKIRILL_WEB_DB_USER'],
-        'PASSWORD': os.environ['EKIRILL_WEB_DB_PASSWORD'],
+        'HOST': env_conf.db.default.host,
+        'NAME': env_conf.db.default.name,
+        'USER': env_conf.db.default.user,
+        'PASSWORD': env_conf.db.default.password,
     }
 }
 
@@ -151,6 +158,14 @@ SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 SOCIAL_AUTH_USER_MODEL = 'auth.User'
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = not DEBUG
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('EKIRILL_WEB_AUTH_GOOGLE_OAUTH2_KEY', '')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('EKIRILL_WEB_AUTH_GOOGLE_OAUTH2_SECRET', '')
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env_conf.auth.google.key
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env_conf.auth.google.secret
 SOCIAL_AUTH_GOOGLE_OAUTH2_LOGIN_REDIRECT_URL = LOGIN_REDIRECT_URL
+
+CAMERA_VIDEODIR = env_conf.camera.videodir
+CAMERA_NOW_IMAGE_NAME = env_conf.camera.now_image_name
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20
+}

@@ -1,5 +1,0 @@
-aiofiles==0.5.0
-environs==7.3.0
-fastapi==0.54.1
-pytz==2020.1
-uvicorn==0.11.5

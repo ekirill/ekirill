@@ -1,7 +1,3 @@
-upstream ekirill_backend {
-    server back:8176 fail_timeout=5s max_fails=5;
-}
-
 upstream ekirill_web_backend {
     server web:8177 fail_timeout=5s max_fails=5;
 }
@@ -20,15 +16,6 @@ server {
         proxy_redirect off;
         proxy_buffering off;
         proxy_pass http://ekirill_web_backend;
-    }
-
-    location /api {
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_redirect off;
-        proxy_buffering off;
-        proxy_pass http://ekirill_backend;
     }
 
     location /protected_cameras/ {
