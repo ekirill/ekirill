@@ -7,8 +7,6 @@ services:
       - "../tmp_webdav/:/tmp/webdav/:ro"
     ports:
       - "8177:8177"
-    depends_on:
-      - db
 
   nginx:
     volumes:

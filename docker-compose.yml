@@ -14,6 +14,8 @@ services:
       - DJANGO_SETTINGS_MODULE=ekirill.settings
     expose:
       - "8177"
+    depends_on:
+      - db
     command:
       - "uwsgi"
       - "--chdir=/app/"
