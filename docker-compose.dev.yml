@@ -16,15 +16,3 @@ services:
       - "../tmp_webdav/:/var/www/webdav/"
     ports:
       - "80:80"
-
-  db:
-    image: postgres:12.5
-    environment:
-      POSTGRES_DB: ekirill
-      POSTGRES_USER: ekirill
-      POSTGRES_PASSWORD: devpassword
-    volumes:
-      - "dbdata:/var/lib/postgresql/data"
-
-volumes:
-  dbdata:

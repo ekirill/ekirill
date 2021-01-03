@@ -54,5 +54,15 @@ services:
       options:
         max-size: "5m"
 
+  db:
+    image: postgres:12.5
+    environment:
+      POSTGRES_DB: ekirill
+      POSTGRES_USER: ${EKIRILL_WEB_DB_DEFAULT_USER}
+      POSTGRES_PASSWORD: ${EKIRILL_WEB_DB_DEFAULT_PASSWORD}
+    volumes:
+      - "dbdata:/var/lib/postgresql/data"
+
 volumes:
   storage:
+  dbdata:
