@@ -1,5 +1,4 @@
 from rest_framework.generics import ListAPIView
-from rest_framework.pagination import PageNumberPagination
 
 from ekirill.cameras.api import serializers
 from ekirill.cameras import repository

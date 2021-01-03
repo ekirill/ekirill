@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>{{ camera.caption }} | События</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #280339;
+        }
+        .page-title {
+            color: #fafaaa;
+        }
+        .page-subtitle {
+            color: #ffff85;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row page-title">
+            <div class="col-12">
+                <h1><a href="{% url 'cameras_list' %}">Камеры</a></h1>
+            </div>
+        </div>
+        <div class="row page-subtitle">
+            <div class="col-12">
+                <h2>События камеры {{ camera.caption }}</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            {% for ev in events %}
+                <div class="col-12 col-sm-6 col-md-4 col-xl-3">
+                    <a href="{% url 'camera_event' camera_uid=camera.uid event_uid=ev.uid %}">
+                        <div class="card text-center mt-1">
+                            <img src="{{ ev.thumb }}" class="img-fluid mt-1" alt="Событие {{ ev.start_time }}">
+                            <div class="card-body">
+                                {{ ev.start_time }}<br>
+                                {{ ev.duration }} сек
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js" integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9" crossorigin="anonymous"></script>
+    <script>$(document).ready(function() { $('body').bootstrapMaterialDesign(); });</script>
+</body>
+</html>
